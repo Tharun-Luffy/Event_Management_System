@@ -4,12 +4,13 @@ const db = require("../config/db");
 
 // Add Event
 router.post("/add", async (req, res) => {
-  const { name, description, date, location, user_id } = req.body;
+  const { title, description, date, location, user_id } = req.body;
   try {
-    await db.query(
-      "INSERT INTO events (name, description, date, location, user_id) VALUES (?, ?, ?, ?, ?)",
-      [name, description, date, location, user_id]
+    const [data] = await db.query(
+      "INSERT INTO events (title, description, date, location, user_id) VALUES (?, ?, ?, ?, ?)",
+      [title, description, date, location, user_id]
     );
+
     res.status(201).json({ message: "Event created successfully" });
   } catch (error) {
     res.status(500).json({ message: "Server Error", error });

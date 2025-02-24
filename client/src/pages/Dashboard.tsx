@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "../services/api";
 
+// Event Interface
 interface Event {
   id: number;
-  name: string;
+  title: string;
   description: string;
   date: string;
   location: string;
@@ -13,7 +14,7 @@ interface Event {
 const Dashboard: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [newEvent, setNewEvent] = useState({
-    name: "",
+    title: "", // Changed from name to title
     description: "",
     date: "",
     location: "",
@@ -24,7 +25,7 @@ const Dashboard: React.FC = () => {
     const fetchEvents = async () => {
       try {
         const userId = localStorage.getItem("userId");
-        const response = await axios.get(`/api/events/user/${userId}`);
+        const response = await axios.get(`/events/user/${userId}`);
         setEvents(response.data);
       } catch (error) {
         console.error("Error fetching events:", error);
@@ -38,12 +39,29 @@ const Dashboard: React.FC = () => {
     e.preventDefault();
     try {
       const userId = localStorage.getItem("userId");
-      await axios.post("/api/events/add", {
+      const response = await axios.post("/events/add", {
         ...newEvent,
         user_id: userId,
       });
+
       alert("Event created successfully!");
-      window.location.reload();
+
+      // Update state to show the new event
+      try {
+        const userId = localStorage.getItem("userId");
+        const response = await axios.get(`/events/user/${userId}`);
+        setEvents(response.data);
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      }
+
+      // Clear form fields
+      setNewEvent({
+        title: "",
+        description: "",
+        date: "",
+        location: "",
+      });
     } catch (error) {
       console.error("Error creating event:", error);
     }
@@ -52,9 +70,11 @@ const Dashboard: React.FC = () => {
   // Delete an event
   const handleDeleteEvent = async (eventId: number) => {
     try {
-      await axios.delete(`/api/events/${eventId}`);
+      await axios.delete(`/events/${eventId}`);
       alert("Event deleted successfully!");
-      window.location.reload();
+
+      // Update state to remove the deleted event
+      setEvents(events.filter((event) => event.id !== eventId));
     } catch (error) {
       console.error("Error deleting event:", error);
     }
@@ -68,9 +88,9 @@ const Dashboard: React.FC = () => {
       <form onSubmit={handleCreateEvent}>
         <input
           type="text"
-          placeholder="Event Name"
-          value={newEvent.name}
-          onChange={(e) => setNewEvent({ ...newEvent, name: e.target.value })}
+          placeholder="Event Title"
+          value={newEvent.title}
+          onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
           required
         />
         <input
@@ -104,7 +124,7 @@ const Dashboard: React.FC = () => {
       <ul>
         {events.map((event) => (
           <li key={event.id}>
-            <h4>{event.name}</h4>
+            <h4>{event.title}</h4>
             <p>{event.description}</p>
             <p>Date: {event.date}</p>
             <p>Location: {event.location}</p>

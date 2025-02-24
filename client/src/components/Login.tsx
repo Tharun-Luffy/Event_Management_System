@@ -20,7 +20,9 @@ const Login: React.FC = () => {
     try {
       const response = await api.post("/users/login", user);
       alert("Login Successful");
-      localStorage.setItem("token", response.data.token);
+      console.log(response.data);
+
+      localStorage.setItem("userId", `${response.data.id}`);
       navigate("/dashboard");
     } catch (error: any) {
       alert(error.response.data.message);
